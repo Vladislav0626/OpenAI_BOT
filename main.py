@@ -5,6 +5,7 @@ import logging
 from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram import F
+from handlers import router
 
 
 async def main():
@@ -14,6 +15,7 @@ async def main():
     )
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher()
+    dp.include_router(router)
     await dp.start_polling(bot)
 
 
