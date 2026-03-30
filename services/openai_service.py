@@ -5,7 +5,7 @@ import asyncio
 
 from pygments.console import ansiformat
 
-cliet = AsyncOpenAI(api_key=TOKEN_GPT_AI)
+client = AsyncOpenAI(api_key=TOKEN_GPT_AI)
 MODEL = 'gpt-4o-mini'
 
 
@@ -14,19 +14,19 @@ logger = logging.getLogger(__name__)
 
 async def ask_gpt(
         user_message = str,
-        system_promt: str = 'Ты полезный ассистент. Отвечай кратко и по делу.',
+        system_prompt: str = 'Ты полезный ассистент. Отвечай кратко и по делу.',
         history: list = None
 ) -> str:
 
     try:
-        messages = [{'role': 'system', 'content': system_promt}]
+        messages = [{'role': 'system', 'content': system_prompt}]
 
         if history:
-            messages.append(history)
+            messages.extend(history)
         messages.append({'role': 'user', 'content': user_message})
         logger.info(f'GPT запрос {user_message[:20]}')
 
-        response = await cliet.chat.completions.create(
+        response = await client.chat.completions.create(
             model=MODEL,
             messages=messages,
             max_tokens=1000,

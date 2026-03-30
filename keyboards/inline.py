@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-def main_menu():
+def main_menu() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -14,6 +14,25 @@ def main_menu():
             [
                 InlineKeyboardButton(text='📈 Новости экономики', callback_data='menu:news', style='success')
             ]
+        ]
+    )
+    return keyboard
+
+
+def random_keyboard() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text='🔄 Расскажи ещё факт', callback_data='random:again')],
+            [InlineKeyboardButton(text='🏠 Закончить', callback_data='random:stop')]
+        ]
+    )
+    return keyboard
+
+
+def gpt_keyboard() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text='Закончить', callback_data='gpt:stop', style='danger')]
         ]
     )
     return keyboard
