@@ -3,7 +3,7 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.fsm.context import FSMContext
-from states.state import GptStates
+from states.state import GptStates  # ← добавлен импорт
 from aiogram.enums import ChatAction
 from services.openai_service import ask_gpt
 from keyboards.inline import gpt_keyboard, main_menu

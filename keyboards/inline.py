@@ -1,4 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from persons import PERSONS
 
 def main_menu() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(
@@ -32,7 +33,30 @@ def random_keyboard() -> InlineKeyboardMarkup:
 def gpt_keyboard() -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text='Закончить', callback_data='gpt:stop', style='danger')]
+            [InlineKeyboardButton(text='❌ Закончить', callback_data='gpt:stop', style='danger')]
         ]
     )
     return keyboard
+
+
+def persons_keyboard():
+    buttons = [
+        [InlineKeyboardButton(
+            text=f'{data["emoji"]} {data["name"]}',
+            callback_data=f'talk:person:{key}'
+        )]
+        for key, data in PERSONS.items()
+    ]
+    buttons.append([
+        InlineKeyboardButton(text='❌ Отмена', callback_data='talk:cancel')
+    ])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def talk_keyboard():
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text='🔄 Сменить собеседника', callback_data='talk:change')],
+            [InlineKeyboardButton(text='🏠 Закончить', callback_data='talk:stop')]
+        ]
+    )
