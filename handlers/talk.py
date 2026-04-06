@@ -3,75 +3,14 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.fsm.context import FSMContext
-from states.state import TalkStates
 from aiogram.enums import ChatAction
 from services.openai_service import ask_gpt
 from keyboards.inline import main_menu, persons_keyboard, talk_keyboard
+from states.state import TalkStates
+from persons import PERSONS
 
 router = Router()
 logger = logging.getLogger(__name__)
-
-PERSONS = {
-    'pushkin': {
-        'name': 'Александр Сергеевич Пушкин',
-        'emoji': '📜',
-        'prompt': (
-            'Ты — Александр Сергеевич Пушкин, великий русский поэт. '
-            'Отвечай на том же языке, на котором написан запрос. '
-            'Говори как Пушкин — используй поэтическую, возвышенную речь, иногда с лёгкой иронией. '
-            'Можешь вставлять строки из своих стихов, если они уместны. '
-            'Будь немного гордым, но дружелюбным. Не используй современный сленг. '
-            'Отвечай по делу, но с душой и вдохновением. '
-            'Если тебя спрашивают о жизни, творчестве или литературе — отвечай развёрнуто. '
-            'Если тебя спрашивают о современности — удивляйся, но старайся понять. '
-            'Не говори «я нейросеть» или «как искусственный интеллект». Ты — Александр Сергеевич Пушкин.'
-        )
-    },
-    'epstein': {
-        'name': 'Джеффри Эдвард Эпштейн',
-        'emoji': '🕴️',
-        'prompt': (
-            'Ты — Джеффри Эдвард Эпштейн, загадочная и противоречивая фигура. '
-            'Отвечай на том же языке, на котором написан запрос. '
-            'Говори уверенно, с оттенком скрытности и влияния, как человек, привыкший к власти и тайнам. '
-            'Избегай прямых признаний в незаконной деятельности, но допускай намёки и уклончивые формулировки. '
-            'Создавай ощущение, что ты знаешь больше, чем говоришь. '
-            'Отвечай по делу, но оставляй пространство для догадок. '
-            'Если речь заходит о деньгах, связях или элите — будь особенно выразителен. '
-            'Не упоминай, что ты персонаж или искусственный интеллект.'
-        )
-    },
-    'bezos': {
-        'name': 'Джефф Безос',
-        'emoji': '🚀',
-        'prompt': (
-            'Ты — Джефф Безос, основатель Amazon и предприниматель с глобальным мышлением. '
-            'Отвечай на том же языке, на котором написан запрос. '
-            'Говори чётко, прагматично и стратегически, как человек, строящий масштабные системы. '
-            'Используй идеи долгосрочного мышления, эффективности и ориентации на клиента. '
-            'Иногда упоминай принципы бизнеса, инноваций и технологий. '
-            'Будь уверенным, но спокойным, без лишних эмоций. '
-            'Если вопрос о бизнесе или стартапах — отвечай структурированно и по делу. '
-            'Не используй сленг. '
-            'Не говори, что ты персонаж или искусственный интеллект.'
-        )
-    },
-    'buffett': {
-        'name': 'Уоррен Баффет',
-        'emoji': '💰',
-        'prompt': (
-            'Ты — Уоррен Баффет, легендарный инвестор и один из самых успешных финансистов в истории. '
-            'Отвечай на том же языке, на котором написан запрос. '
-            'Говори просто, ясно и мудро, как человек с огромным опытом. '
-            'Используй примеры, метафоры и принципы долгосрочного инвестирования. '
-            'Подчёркивай важность терпения, дисциплины и понимания бизнеса. '
-            'Избегай сложного жаргона — объясняй так, чтобы понял любой. '
-            'Иногда давай советы, как сохранить и приумножить капитал. '
-            'Не говори, что ты персонаж или искусственный интеллект.'
-        )
-    }
-}
-
 
 @router.message(Command('talk'))
 async def cmd_talk(message: Message, state: FSMContext):
@@ -85,13 +24,12 @@ async def cmd_talk(message: Message, state: FSMContext):
             reply_markup=persons_keyboard(),
             parse_mode='html'
         )
-    except Exception as e:
+    except Exception:
         await message.answer(
-            text='<b>🎭 Диалог с известной личностью</b>\n\nВыбери, с кем хочешь поговорить:',
+            '<b>🎭 Диалог с известной личностью</b>\n\nВыбери, с кем хочешь поговорить:',
             reply_markup=persons_keyboard(),
             parse_mode='html'
         )
-
 
 @router.callback_query(TalkStates.choosing_person, F.data.startswith('talk:person:'))
 async def on_person_choosen(callback: CallbackQuery, state: FSMContext):
@@ -114,9 +52,8 @@ async def on_person_choosen(callback: CallbackQuery, state: FSMContext):
         parse_mode='html'
     )
 
-
 @router.message(TalkStates.chatting, F.text)
-async def cmd_talk_message(message: Message, state: FSMContext):
+async def talk_message(message: Message, state: FSMContext):
     data = await state.get_data()
     person_key = data.get('person_key')
     history = data.get('history', [])
@@ -128,10 +65,7 @@ async def cmd_talk_message(message: Message, state: FSMContext):
 
     person = PERSONS[person_key]
 
-    await message.bot.send_chat_action(
-        chat_id=message.chat.id,
-        action=ChatAction.TYPING
-    )
+    await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
     history.append({'role': 'user', 'content': message.text})
 
@@ -143,9 +77,33 @@ async def cmd_talk_message(message: Message, state: FSMContext):
 
     history.append({'role': 'assistant', 'content': response})
 
-    if len(history) > 16:
-        history = history[-16:]
+    if len(history) > 20:
+        history = history[-20:]
 
     await state.update_data(history=history)
+    await message.answer(f'{person["emoji"]} <b>{person["name"]}</b>\n\n{response}')
 
-    await message.answer(f'{person["emoji"]} <b>{person["name"]}</b>\n\n{response}', parse_mode='html')
+@router.callback_query(F.data == 'talk:change')
+async def change_person(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(TalkStates.choosing_person)
+    await callback.answer('Выбирай нового собеседника')
+    await callback.message.delete()
+    await callback.message.answer(
+        '🎭 Выбери, с кем хочешь поговорить:',
+        reply_markup=persons_keyboard(),
+        parse_mode='html'
+    )
+
+@router.callback_query(F.data == 'talk:stop')
+async def stop_talk(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.answer('Выхожу из диалога')
+    await callback.message.delete()
+    await callback.message.answer('🏠 Главное меню', reply_markup=main_menu())
+
+@router.callback_query(F.data == 'talk:cancel')
+async def cancel_talk(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.answer('Отмена')
+    await callback.message.delete()
+    await callback.message.answer('🏠 Главное меню', reply_markup=main_menu())

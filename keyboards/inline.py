@@ -60,3 +60,33 @@ def talk_keyboard():
             [InlineKeyboardButton(text='🏠 Закончить', callback_data='talk:stop')]
         ]
     )
+
+
+def topics_keyboard(topics: dict) -> InlineKeyboardMarkup:
+    buttons = [
+        [InlineKeyboardButton(text=f'📚 {data["name"]}', callback_data=f'quiz:topic:{key}')]
+        for key, data in topics.items()
+
+    ]
+    buttons.append(
+        [InlineKeyboardButton(text='❌ Отмена', callback_data='quiz:cancel')]
+    )
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def after_answer_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text='➡️ Следующий вопрос', callback_data='quiz:next', style='primary')],
+            [InlineKeyboardButton(text='🔄 Сменить тему', callback_data='quiz:change_topic', style='primary')],
+            [InlineKeyboardButton(text='🏠 Закончить квиз', callback_data='quiz:stop', style='danger')]
+        ]
+    )
+
+
+def news_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text='Закрыть сводку', callback_data='economic:stop', style='danger')]
+        ]
+    )

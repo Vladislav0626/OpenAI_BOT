@@ -2,22 +2,21 @@ import logging
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, FSInputFile
-from aiogram.enums import chat_action, ChatAction
+from aiogram.enums import ChatAction
 from services.openai_service import ask_gpt
 from keyboards.inline import random_keyboard, main_menu
 
 router = Router()
 logger = logging.getLogger(__name__)
 
-FACT_PROMPT = 'Расскажи один малоизвестный, но познавательный факт. Факт должен быть достоверным, интересным и не из разряда «общеизвестных истин». Ответ должен содержать только сам факт, без приветствий, пояснений, вопросов или лишнего текста. Никаких «знаете ли вы», «кстати», «вот вам интересно». Только сухой, ёмкий факт. Обязательное условие: факт должен быть не длиннее четырех предложений.'
-
+FACT_PROMPT = (
+    'Расскажи один малоизвестный, но познавательный факт. '
+    'Ответ должен содержать только сам факт, без приветствий, пояснений, вопросов или лишнего текста. '
+    'Факт должен быть не длиннее четырёх предложений.'
+)
 
 async def send_random_fact(message: Message):
-    await message.bot.send_chat_action(
-        chat_id=message.chat.id,
-        action=ChatAction.TYPING
-    )
-
+    await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
     fact = await ask_gpt(user_message=FACT_PROMPT)
 
     try:
@@ -28,25 +27,17 @@ async def send_random_fact(message: Message):
             reply_markup=random_keyboard(),
             parse_mode='html'
         )
-    except Exception as e:
-        logger.error('Не удалось отправить фото')
+    except Exception:
+        logger.exception('Не удалось отправить фото')
         await message.answer(
             f'<b>🎲 Случайный факт</b>\n\n📖 {fact}',
             reply_markup=random_keyboard(),
             parse_mode='html'
         )
 
-
 @router.message(Command('random'))
 async def cmd_random(message: Message):
     await send_random_fact(message)
-
-
-@router.callback_query(F.data == 'random:again')
-async def cmd_random_again(callback: CallbackQuery):
-    await callback.answer()
-    await callback.message.delete() #Удаление старого сообщения (пометка для себя)
-    await send_random_fact(callback.message)
 
 
 @router.callback_query(F.data == 'random:stop')
