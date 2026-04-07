@@ -28,6 +28,7 @@ async def cmd_help(message: Message):
         '💬 /gpt - диалог с ChatGPT\n'
         '🎭 /talk - диалог с личностью\n'
         '❓ /quiz - квиз\n'
+        '🤖 /git - Ссылка на репозиторий GitHub\n'
         '❓ /help - помощь',
         parse_mode='html'
     )
@@ -35,8 +36,8 @@ async def cmd_help(message: Message):
 @router.message(Command('git'))
 async def cmd_git(message: Message):
     await message.answer(
-        'Ссылка на репозиторий GitHub: https://github.com/Vladislav0626/OpenAI_BOT'
-        'Нажми /start чтобы продолжить использовать бота!'
+        '🚀 Ссылка на репозиторий GitHub: https://github.com/Vladislav0626/OpenAI_BOT\n\n'
+        '🤖 Нажми /start чтобы продолжить использовать бота!'
     )
 
 
